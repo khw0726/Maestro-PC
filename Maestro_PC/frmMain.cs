@@ -91,7 +91,10 @@ namespace Maestro_PC
                 }
             }
         }
-
+        private void button_Mouse_Click(object sender, EventArgs e)
+        {
+            presentation.SlideShowWindow.View.LaserPointerEnabled = true;
+        }
         private void frmMain_Load(object sender, EventArgs e)
         {
             this.Size = new Size(500, 500);
@@ -120,6 +123,13 @@ namespace Maestro_PC
             button_Next.Click += new EventHandler(button_Next_Click);
             this.Controls.Add(button_Next);
 
+            MetroFramework.Controls.MetroButton button_Mouse = new MetroFramework.Controls.MetroButton();
+            button_Mouse.Size = new Size(200, 50);
+            button_Mouse.Left = 150;
+            button_Mouse.Top = 360;
+            button_Mouse.Text = "Mouse Pointer";
+            button_Mouse.Click += new EventHandler(button_Mouse_Click);
+            this.Controls.Add(button_Mouse);
         }
     }
 }
