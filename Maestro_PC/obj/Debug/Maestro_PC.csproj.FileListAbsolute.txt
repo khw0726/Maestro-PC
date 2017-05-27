@@ -11,3 +11,16 @@ C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\o
 C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\obj\Debug\Maestro_PC.exe
 C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\obj\Debug\Maestro_PC.pdb
 C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\obj\Debug\Maestro_PC.csproj.ResolveComReference.cache
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.dll
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.Extras.dll
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\InTheHand.Net.Personal.dll
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\Microsoft.Practices.ServiceLocation.dll
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\System.Windows.Interactivity.dll
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.pdb
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.xml
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.Extras.pdb
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\GalaSoft.MvvmLight.Extras.xml
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\InTheHand.Net.Personal.xml
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\Microsoft.Practices.ServiceLocation.pdb
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\Microsoft.Practices.ServiceLocation.xml
+C:\Users\chemidong\Documents\Visual Studio 2015\Projects\Maestro_PC\Maestro_PC\bin\Debug\System.Windows.Interactivity.xml

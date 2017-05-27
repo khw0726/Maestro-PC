@@ -37,6 +37,7 @@
             this.ClientSize = new System.Drawing.Size(794, 643);
             this.Name = "frmMain";
             this.Text = "Maestro";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmMain_FormClosed);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.ResumeLayout(false);
 
