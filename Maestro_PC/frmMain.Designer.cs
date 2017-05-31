@@ -28,22 +28,38 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.cbxReverse = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
+            // 
+            // cbxReverse
+            // 
+            this.cbxReverse.AutoSize = true;
+            this.cbxReverse.Location = new System.Drawing.Point(83, 369);
+            this.cbxReverse.Name = "cbxReverse";
+            this.cbxReverse.Size = new System.Drawing.Size(101, 22);
+            this.cbxReverse.TabIndex = 0;
+            this.cbxReverse.Text = "Reverse";
+            this.cbxReverse.UseVisualStyleBackColor = true;
+            this.cbxReverse.CheckedChanged += new System.EventHandler(this.cbxReverse_CheckedChanged);
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(794, 643);
+            this.ClientSize = new System.Drawing.Size(300, 300);
+            this.Controls.Add(this.cbxReverse);
             this.Name = "frmMain";
             this.Text = "Maestro";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmMain_FormClosed);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
+
+        private System.Windows.Forms.CheckBox cbxReverse;
     }
 }
 
