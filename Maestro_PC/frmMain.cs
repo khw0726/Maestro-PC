@@ -19,7 +19,6 @@ using InTheHand.Net.Bluetooth.AttributeIds;
 using System.IO;
 namespace Maestro_PC
 {
-
     public partial class frmMain : MetroForm
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
@@ -31,6 +30,7 @@ namespace Maestro_PC
         private const int MOUSEEVENTF_LEFTUP = 0x04;
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
+        int sens = 7;
 
         public void DoMouseClick()
         {
@@ -45,6 +45,7 @@ namespace Maestro_PC
         private bool direction = true;
         private bool powercon = false;
         private bool threadcon = true;
+        private bool trigger_drag = false;
         char[] delimiterChars = { 'M', ','};
         //private double v0_X, v0_Y;
         //private double dt;
@@ -214,7 +215,7 @@ namespace Maestro_PC
             button_Bluetooth.Text = "Connect Bluetooth";
             button_Bluetooth.Click += new EventHandler(button_Bluetooth_Click);
             this.Controls.Add(button_Bluetooth);
-
+            
             cbxReverse.Location = new Point(50, 250);
 
         }
@@ -275,7 +276,6 @@ namespace Maestro_PC
         }
         public void mouse_control(String msg)
         {
-            int sens = 7;
             string[] words = msg.Split(delimiterChars);
             double ax = Convert.ToDouble(words[1]);
             double ay = Convert.ToDouble(words[2]);
@@ -285,6 +285,8 @@ namespace Maestro_PC
             x *= -sens;
             y *= -sens;
             Cursor.Position = new Point(Cursor.Position.X + x, Cursor.Position.Y + y);
+            if(trigger_drag == true)
+                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
         }
         public void UpdateLogText(String msg)
         {
@@ -377,15 +379,33 @@ namespace Maestro_PC
                 }
                 else if(msg[0] == 'Z')
                 {
+                    sens = 2;
                     Console.WriteLine("Z is inputed");
-                    presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerPen;
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                    try
+                    {
+                        presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerPen;
+                        trigger_drag = true;
+                        mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                    }
+                    catch
+                    {
+                        trigger_drag = false;
+                    }
+
                 }
                 else if(msg[0] == 'X')
                 {
                     Console.WriteLine("X is inputed");
-                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                    presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                    sens = 7;
+                    trigger_drag = false;
+                    try
+                    {
+                        presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                        mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                        
+                    }
+                    catch { }
+                    
                 }
             }
         }
