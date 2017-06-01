@@ -52,6 +52,7 @@
             this.Text = "Maestro";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmMain_FormClosed);
             this.Load += new System.EventHandler(this.frmMain_Load);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmClick);
             this.ResumeLayout(false);
             this.PerformLayout();
 

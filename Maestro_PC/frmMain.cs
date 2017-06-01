@@ -19,8 +19,24 @@ using InTheHand.Net.Bluetooth.AttributeIds;
 using System.IO;
 namespace Maestro_PC
 {
+
     public partial class frmMain : MetroForm
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        static extern bool SetCursorPos(int x, int y);
+        //Mouse actions
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
+        private const int MOUSEEVENTF_RIGHTUP = 0x10;
+
+        public void DoMouseClick()
+        {
+            //Call the imported function with the cursor's current position
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+        }
         private PPT.Application pptApplication;
         private PPT.Presentation presentation;
         private PPT.Slide slide;
@@ -28,6 +44,7 @@ namespace Maestro_PC
         private int slidescount;
         private bool direction = true;
         private bool powercon = false;
+        private bool threadcon = true;
         char[] delimiterChars = { 'M', ','};
         //private double v0_X, v0_Y;
         //private double dt;
@@ -40,6 +57,8 @@ namespace Maestro_PC
         BluetoothClient btClient;  //represent the bluetooth client connection
         BluetoothListener btListener; //represent this server bluetooth device
 
+        MetroFramework.Controls.MetroButton button_Connect = new MetroFramework.Controls.MetroButton();
+        MetroFramework.Controls.MetroButton button_Bluetooth = new MetroFramework.Controls.MetroButton();
         public frmMain()
         {
             InitializeComponent();
@@ -63,112 +82,92 @@ namespace Maestro_PC
                     slide = pptApplication.SlideShowWindows[1].View.Slide;
                 }
                 powercon = true;
+                button_Connect.Text = "Powerpoint Connected";
+                button_Connect.Enabled = false;
             }
             catch
             {
                 MetroFramework.MetroMessageBox.Show(this, "Please check PowerPoint is running.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void slide_previous()
+        private void slide_Previous()
         {
             if (powercon)
             {
-                int slideIndex = slide.SlideIndex - 1;
-                if (slideIndex >= 1)
+                try
                 {
-                    try
+                    pptApplication.Active.ToString();
+                    int slideIndex = slide.SlideIndex - 1;
+                    if (slideIndex >= 1)
                     {
-                        slide = slides[slideIndex];
-                        slides[slideIndex].Select();
+                        try
+                        {
+                            slide = slides[slideIndex];
+                            slides[slideIndex].Select();
+                        }
+                        catch
+                        {
+                            pptApplication.SlideShowWindows[1].View.Previous();
+                            slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        }
                     }
-                    catch
+                    else
                     {
-                        pptApplication.SlideShowWindows[1].View.Previous();
-                        slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        //MetroFramework.MetroMessageBox.Show(this, "This page is the first page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                else
+                catch
                 {
-                    MetroFramework.MetroMessageBox.Show(this, "This page is the first page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    powercon = false;
+                    button_Connect.Text = "Powerpoint Connection";
+                    button_Connect.Enabled = true;
+                    MetroFramework.MetroMessageBox.Show(this, "Powerpoint is disconnected.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
             }
         }
-        private void button_Previous_Click(object sender, EventArgs e)
+        private void button_Bluetooth_Click(object sender, EventArgs e)
         {
-            slide_previous();
+            bluetooth_connect();
         }
         private void slide_next()
         {
             if (powercon)
             {
-                int slideIndex = slide.SlideIndex + 1;
-                if (slideIndex > slidescount)
+                try
                 {
-                    //MetroFramework.MetroMessageBox.Show(this, "This page is the last page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    pptApplication.Active.ToString();
+                    int slideIndex = slide.SlideIndex + 1;
+                    if (slideIndex > slidescount)
+                    {
+                        //presentation.SlideShowSettings.Application.Quit();
+                        //MetroFramework.MetroMessageBox.Show(this, "This page is the last page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            slide = slides[slideIndex];
+                            slides[slideIndex].Select();
+                        }
+                        catch
+                        {
+                            pptApplication.SlideShowWindows[1].View.Next();
+                            slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        }
+                    }
                 }
-                else
+                catch
                 {
-                    try
-                    {
-                        slide = slides[slideIndex];
-                        slides[slideIndex].Select();
-                    }
-                    catch
-                    {
-                        pptApplication.SlideShowWindows[1].View.Next();
-                        slide = pptApplication.SlideShowWindows[1].View.Slide;
-                    }
+                    powercon = false;
+                    button_Connect.Text = "Powerpoint Connection";
+                    button_Connect.Enabled = true;
+                    MetroFramework.MetroMessageBox.Show(this, "Powerpoint is disconnected.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
-        private void button_Next_Click(object sender, EventArgs e)
+        private void bluetooth_connect()
         {
-            slide_next();
-        }
-        private void button_Mouse_Click(object sender, EventArgs e)
-        {
-            presentation.SlideShowWindow.View.LaserPointerEnabled = true;
-        }
-        private void frmMain_Load(object sender, EventArgs e)
-        {
-            this.Size = new Size(300, 300);
-            MetroFramework.Controls.MetroButton button_Connect = new MetroFramework.Controls.MetroButton();
-            button_Connect.Size = new Size(200, 50);
-            button_Connect.Left = 50;
-            button_Connect.Top = 120;
-            button_Connect.Text = "Connect Powerpoint";
-            button_Connect.Click += new EventHandler(button_Connect_Click);
-            this.Controls.Add(button_Connect);
-
-
-            //MetroFramework.Controls.MetroButton button_Previous = new MetroFramework.Controls.MetroButton();
-            //button_Previous.Size = new Size(200, 50);
-            //button_Previous.Left = 150;
-            //button_Previous.Top = 200;
-            //button_Previous.Text = "Previous Slide";
-            //button_Previous.Click += new EventHandler(button_Previous_Click);
-            //this.Controls.Add(button_Previous);
-
-            //MetroFramework.Controls.MetroButton button_Next = new MetroFramework.Controls.MetroButton();
-            //button_Next.Size = new Size(200, 50);
-            //button_Next.Left = 150;
-            //button_Next.Top = 280;
-            //button_Next.Text = "Next Slide";
-            //button_Next.Click += new EventHandler(button_Next_Click);
-            //this.Controls.Add(button_Next);
-
-            //MetroFramework.Controls.MetroButton button_Mouse = new MetroFramework.Controls.MetroButton();
-            //button_Mouse.Size = new Size(200, 50);
-            //button_Mouse.Left = 150;
-            //button_Mouse.Top = 360;
-            //button_Mouse.Text = "Mouse Pointer";
-            //button_Mouse.Click += new EventHandler(button_Mouse_Click);
-            //this.Controls.Add(button_Mouse);
-
-            cbxReverse.Location = new Point(50, 200);
-
-            //when the bluetooth is supported by this computer
-
             if (BluetoothRadio.IsSupported)
             {
 
@@ -183,89 +182,64 @@ namespace Maestro_PC
                 UpdateLogText("Primary Bluetooth Radio Software Manufacturer : " + BluetoothRadio.PrimaryRadio.SoftwareManufacturer);
                 UpdateLogText("—————————–");
 
+                button_Bluetooth.Enabled = false;
+                button_Bluetooth.Text = "Waiting for watch connection";
+                threadcon = true;
                 //creating and starting the thread
                 AcceptAndListeningThread = new Thread(AcceptAndListen);
-
+                AcceptAndListeningThread.IsBackground = true;
                 AcceptAndListeningThread.Start();
-
             }
             else
             {
                 UpdateLogText("Bluetooth not Supported!");
+                threadcon = false;
+                MetroFramework.MetroMessageBox.Show(this, "Bluetooth is not supported. Please check your computer's bluetooth turend on.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            this.Size = new Size(300, 300);
+
+            button_Connect.Size = new Size(200, 50);
+            button_Connect.Left = 50;
+            button_Connect.Top = 100;
+            button_Connect.Text = "Connect Powerpoint";
+            button_Connect.Click += new EventHandler(button_Connect_Click);
+            this.Controls.Add(button_Connect);
+
+            button_Bluetooth.Size = new Size(200, 50);
+            button_Bluetooth.Left = 50;
+            button_Bluetooth.Top = 170;
+            button_Bluetooth.Text = "Connect Bluetooth";
+            button_Bluetooth.Click += new EventHandler(button_Bluetooth_Click);
+            this.Controls.Add(button_Bluetooth);
+
+            cbxReverse.Location = new Point(50, 250);
 
         }
         private delegate void UpdateLogCallback(string strMessage);
         StreamReader srReceiver;
         private void ReceiveMessages()
         {
-            // Receive the response from the server
             srReceiver = new StreamReader(btClient.GetStream());
-
-            // If the first character of the response is 1, connection was successful
-            string ConResponse = srReceiver.ReadLine();
-            Console.WriteLine(ConResponse);
-            Console.WriteLine("");
-            // If the first character is a 1, connection was successful
-            //if (ConResponse[0] == '1')
-            //{
-            //    // Update the form to tell it we are now connected
-            //    this.Invoke(new UpdateLogCallback(this.UpdateLogText), new object[] { "Connected Successfully!" });
-            //}
-            //else // If the first character is not a 1 (probably a 0), the connection was unsuccessful
-            //{
-            //    string Reason = "Not Connected: ";
-
-            //    // Extract the reason out of the response message. The reason starts at the 3rd character
-            //    Reason += ConResponse.Substring(2, ConResponse.Length - 2);
-
-            //    // Exit the method
-            //    return;
-            //}
-            // While we are successfully connected, read incoming lines from the server
-            while (isConnected)
+            while (threadcon)
             {
-                // Show the messages in the log TextBox
                 this.Invoke(new UpdateLogCallback(this.UpdateLogText), new object[] { srReceiver.ReadLine() });
             }
+            //MetroFramework.MetroMessageBox.Show(this, "Bluetooth is disconnected.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
         }
         public void AcceptAndListen()
         {
-            while (true)
+            while (threadcon)
             {
                 if (isConnected)
                 {
-                    //TODO: if there is a device connected
-                    //listening
                     try
                     {
+                        this.button_Bluetooth.Invoke((MethodInvoker)delegate { this.button_Bluetooth.Text = "Bluetooth Connected"; });
                         UpdateLogTextFromThread("Listening….");
-                        //NetworkStream stream = btClient.GetStream();
-                        //Byte[] bytes = new Byte[512];
-
-                        //String retrievedMsg = "";
-
-                        ////stream.Read(bytes, 0, 512);
-
-                        ////stream.Flush();
-
-                        //retrievedMsg = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                        //if (retrievedMsg[0] == '1')
-                        //{
-                        //    //UpdateLogTextFromThread("1");
-                        //    slide_previous();
-                        //}
-                        //else if (retrievedMsg[0] == '2')
-                        //{
-                        //    //UpdateLogTextFromThread("2");
-                        //    slide_next();
-                        //}
-                        //UpdateLogTextFromThread(retrievedMsg);
-                        //if (!retrievedMsg.Contains("servercheck"))
-                        //{
-
-                        //    //sendMessage("Message Received!");
-                        //}
                         ReceiveMessages();
                     }
                     catch (Exception ex)
@@ -277,14 +251,12 @@ namespace Maestro_PC
                 }
                 else
                 {
-                    //TODO: if there is no connection
-                    // accepting
                     try
                     {
                         btListener = new BluetoothListener(BluetoothService.RFCommProtocol);
 
                         UpdateLogTextFromThread("Listener created with TCP Protocol service " + BluetoothService.RFCommProtocol);
-                        UpdateLogTextFromThread("Starting Listener….");
+                        UpdateLogTextFromThread("*Starting Listener….");
                         btListener.Start();
                         UpdateLogTextFromThread("Listener Started!");
                         UpdateLogTextFromThread("Accepting incoming connection….");
@@ -303,24 +275,15 @@ namespace Maestro_PC
         }
         public void mouse_control(String msg)
         {
-            int sens = 8;
+            int sens = 7;
             string[] words = msg.Split(delimiterChars);
-            double ax = Convert.ToDouble(words[2]);
-            double ay = Convert.ToDouble(words[1]);
-            //dt = Convert.ToDouble(words[3]) * 0.000000001;
-            //v0_X += Convert.ToDouble(words[2]) * dt * -1;
-            //v0_Y += Convert.ToDouble(words[1]) * dt * -1;
-            //int x = Convert.ToInt32(v0_X * dt + 0.5 * Convert.ToDouble(words[2]) * -1 * dt * dt);
-            //int y = Convert.ToInt32(v0_Y * dt + 0.5 * Convert.ToDouble(words[1]) * -1 * dt * dt);
-            //int x = Convert.ToInt32(ax * sens) * -1;
-            //int y = Convert.ToInt32(ay * sens) * -1;
+            double ax = Convert.ToDouble(words[1]);
+            double ay = Convert.ToDouble(words[2]);
             int x, y;
-            x = (Math.Abs(ax)>=1) ? ((ax>0) ? 1 : -1) : 0;
-            y = (Math.Abs(ay) >= 1) ? ((ay > 0) ? 1 : -1) : 0;
+            x = (int)ax;
+            y = (int)ay;
             x *= -sens;
             y *= -sens;
-            //Console.WriteLine("x : " + (Convert.ToDouble(words[1])* sens).ToString() + ", y : "  + (Convert.ToDouble(words[2])* sens).ToString());
-            //Console.WriteLine("x : " + x.ToString() + ", y : " + y.ToString());
             Cursor.Position = new Point(Cursor.Position.X + x, Cursor.Position.Y + y);
         }
         public void UpdateLogText(String msg)
@@ -331,7 +294,7 @@ namespace Maestro_PC
                 if (msg[0] == '1')
                 {
                     if (direction)
-                        slide_previous();
+                        slide_Previous();
                     else
                         slide_next();
                 }
@@ -340,23 +303,96 @@ namespace Maestro_PC
                     if (direction)
                         slide_next();
                     else
-                        slide_previous();
+                        slide_Previous();
                 }
                 else if (msg[0] == '3')
                 {
                     if (powercon)
-                        presentation.SlideShowWindow.View.LaserPointerEnabled = !presentation.SlideShowWindow.View.LaserPointerEnabled;
+                    {
+                        try
+                        { 
+                            presentation.SlideShowWindow.View.LaserPointerEnabled = false;
+                            presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                        }
+                        catch
+                        { }
+                    }
                 }
+                else if (msg[0] == '4')
+                {
+                    if (powercon)
+                    {
+                        try
+                        {
+                            presentation.SlideShowWindow.View.LaserPointerEnabled = true;
+                            presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                        }
+                        catch { }
+                    }
+                }
+                //else if (msg[0] == '5')
+                //{
+                //    if (powercon)
+                //    {
+                //        try
+                //        { 
+                //            presentation.SlideShowWindow.View.LaserPointerEnabled = false;
+                //            presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerPen;
+                //        }
+                //        catch { }
+                //    }
+                //}
                 else if (msg[0] == 'M')
                 {
                     mouse_control(msg);
+                }
+                else if(msg[0] == 'D')
+                {
+                    threadcon = false;
+                    button_Bluetooth.Enabled = true;
+                    button_Bluetooth.Text = "Connect Bluetooth";
+                    btClient.GetStream().Close();
+                    btClient.Dispose();
+                    btListener.Stop();
+                    AcceptAndListeningThread.Abort();
+                }
+                else if(msg[0]=='C')
+                {
+                    //click
+                    DoMouseClick();
+                }
+                else if(msg[0]=='S')
+                {
+                    if(powercon)
+                    {
+                        try
+                        {
+                            presentation.SlideShowWindow.ToString();
+                        }
+                        catch
+                        {
+                            presentation.SlideShowSettings.Run();
+                        }
+                    }
+                }
+                else if(msg[0] == 'Z')
+                {
+                    Console.WriteLine("Z is inputed");
+                    presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerPen;
+                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                }
+                else if(msg[0] == 'X')
+                {
+                    Console.WriteLine("X is inputed");
+                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                    presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
                 }
             }
         }
         delegate void UpdateLogTextFromThreadDelegate(String msg);
         public void UpdateLogTextFromThread(String msg)
         {
-            if (!this.IsDisposed && this.InvokeRequired)
+            if (!this.IsDisposed && this.InvokeRequired && threadcon)
             {
                 this.Invoke(new UpdateLogTextFromThreadDelegate(UpdateLogText), new Object[] { msg });
             }
@@ -366,10 +402,14 @@ namespace Maestro_PC
         {
             try
             {
-                AcceptAndListeningThread.Abort();
-                btClient.GetStream().Close();
-                btClient.Dispose();
+                threadcon = false;
                 btListener.Stop();
+                if(btClient != null)
+                {
+                    btClient.GetStream().Close();
+                    btClient.Dispose();
+                }
+                AcceptAndListeningThread.Abort();
             }
             catch (Exception)
             {
@@ -378,7 +418,15 @@ namespace Maestro_PC
         private void cbxReverse_CheckedChanged(object sender, EventArgs e)
         {
             direction = !direction;
+            //DoMouseClick();
             //Cursor.Position = new Point(Cursor.Position.X + 500, Cursor.Position.Y + 50);
+            presentation.SlideShowSettings.Run();
+        }
+
+
+        private void frmClick(object sender, MouseEventArgs e)
+        {
+            
         }
     }
 }
