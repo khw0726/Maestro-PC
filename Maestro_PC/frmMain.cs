@@ -313,7 +313,6 @@ namespace Maestro_PC
                     {
                         try
                         { 
-                            presentation.SlideShowWindow.View.LaserPointerEnabled = false;
                             presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
                         }
                         catch
@@ -326,8 +325,7 @@ namespace Maestro_PC
                     {
                         try
                         {
-                            presentation.SlideShowWindow.View.LaserPointerEnabled = true;
-                            presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                            presentation.SlideShowWindow.View.LaserPointerEnabled = !presentation.SlideShowWindow.View.LaserPointerEnabled;
                         }
                         catch { }
                     }
