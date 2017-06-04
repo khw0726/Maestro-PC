@@ -46,6 +46,7 @@ namespace Maestro_PC
         private bool powercon = false;
         private bool threadcon = true;
         private bool trigger_drag = false;
+        private bool laser = false;
         char[] delimiterChars = { 'M', ','};
         //private double v0_X, v0_Y;
         //private double dt;
@@ -98,31 +99,28 @@ namespace Maestro_PC
                 try
                 {
                     pptApplication.Active.ToString();
-                    int slideIndex = slide.SlideIndex - 1;
-                    if (slideIndex >= 1)
-                    {
-                        try
-                        {
-                            slide = slides[slideIndex];
-                            slides[slideIndex].Select();
-                        }
-                        catch
-                        {
-                            pptApplication.SlideShowWindows[1].View.Previous();
-                            slide = pptApplication.SlideShowWindows[1].View.Slide;
-                        }
-                    }
-                    else
-                    {
-                        //MetroFramework.MetroMessageBox.Show(this, "This page is the first page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    //int slideIndex = slide.SlideIndex - 1;
+                    presentation.SlideShowWindow.View.Previous();
+                    //if (slideIndex >= 1)
+                    //{
+                    //    try
+                    //    {
+                    //        slide = slides[slideIndex];
+                    //        slides[slideIndex].Select();
+                    //    }
+                    //    catch
+                    //    {
+                    //        pptApplication.SlideShowWindows[1].View.Previous();
+                    //        slide = pptApplication.SlideShowWindows[1].View.Slide;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    //MetroFramework.MetroMessageBox.Show(this, "This page is the first page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //}
                 }
                 catch
                 {
-                    powercon = false;
-                    button_Connect.Text = "Powerpoint Connection";
-                    button_Connect.Enabled = true;
-                    MetroFramework.MetroMessageBox.Show(this, "Powerpoint is disconnected.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }
@@ -138,32 +136,29 @@ namespace Maestro_PC
                 try
                 {
                     pptApplication.Active.ToString();
-                    int slideIndex = slide.SlideIndex + 1;
-                    if (slideIndex > slidescount)
-                    {
-                        //presentation.SlideShowSettings.Application.Quit();
-                        //MetroFramework.MetroMessageBox.Show(this, "This page is the last page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            slide = slides[slideIndex];
-                            slides[slideIndex].Select();
-                        }
-                        catch
-                        {
-                            pptApplication.SlideShowWindows[1].View.Next();
-                            slide = pptApplication.SlideShowWindows[1].View.Slide;
-                        }
-                    }
+                    presentation.SlideShowWindow.View.Next();
+                    //int slideIndex = slide.SlideIndex + 1;
+                    //if (slideIndex > slidescount)
+                    //{
+                    //    //presentation.SlideShowSettings.Application.Quit();
+                    //    //MetroFramework.MetroMessageBox.Show(this, "This page is the last page.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //}
+                    //else
+                    //{
+                    //    try
+                    //    {
+                    //        slide = slides[slideIndex];
+                    //        slides[slideIndex].Select();
+                    //    }
+                    //    catch
+                    //    {
+                    //        pptApplication.SlideShowWindows[1].View.Next();
+                    //        slide = pptApplication.SlideShowWindows[1].View.Slide;
+                    //    }
+                    //}
                 }
                 catch
                 {
-                    powercon = false;
-                    button_Connect.Text = "Powerpoint Connection";
-                    button_Connect.Enabled = true;
-                    MetroFramework.MetroMessageBox.Show(this, "Powerpoint is disconnected.", "Maestro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -290,7 +285,7 @@ namespace Maestro_PC
         }
         public void UpdateLogText(String msg)
         {
-            Console.WriteLine(msg);
+            Console.WriteLine(msg + " : " + DateTime.Now.ToString());
             if (msg != null)
             { 
                 if (msg[0] == '1')
@@ -312,7 +307,9 @@ namespace Maestro_PC
                     if (powercon)
                     {
                         try
-                        { 
+                        {
+                            laser = false;
+                            presentation.SlideShowWindow.View.LaserPointerEnabled = laser;
                             presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
                         }
                         catch
@@ -325,7 +322,8 @@ namespace Maestro_PC
                     {
                         try
                         {
-                            presentation.SlideShowWindow.View.LaserPointerEnabled = !presentation.SlideShowWindow.View.LaserPointerEnabled;
+                            laser = true;
+                            presentation.SlideShowWindow.View.LaserPointerEnabled = laser;
                         }
                         catch { }
                     }
@@ -358,7 +356,6 @@ namespace Maestro_PC
                 }
                 else if(msg[0]=='C')
                 {
-                    //click
                     DoMouseClick();
                 }
                 else if(msg[0]=='S')
@@ -398,11 +395,14 @@ namespace Maestro_PC
                     trigger_drag = false;
                     try
                     {
-                        presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                        Thread.Sleep(100);
                         mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                        
+                        presentation.SlideShowWindow.View.PointerType = PPT.PpSlideShowPointerType.ppSlideShowPointerArrow;
+                        presentation.SlideShowWindow.View.LaserPointerEnabled = laser;
                     }
-                    catch { }
+                    catch {
+                        Console.WriteLine("X Error");
+                    }
                     
                 }
             }
@@ -436,9 +436,6 @@ namespace Maestro_PC
         private void cbxReverse_CheckedChanged(object sender, EventArgs e)
         {
             direction = !direction;
-            //DoMouseClick();
-            //Cursor.Position = new Point(Cursor.Position.X + 500, Cursor.Position.Y + 50);
-            presentation.SlideShowSettings.Run();
         }
 
 
